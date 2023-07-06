@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mshell.notepad.AppController
 import com.mshell.notepad.core.adapter.NoteAdapter
 import com.mshell.notepad.core.db.Note
-import com.mshell.notepad.core.db.NoteDao
 import com.mshell.notepad.core.db.NoteDao.Properties
 import com.mshell.notepad.databinding.ActivityNoteBinding
 
@@ -31,8 +30,8 @@ class NoteActivity : AppCompatActivity() {
     private fun firstInit() {
         setLauncher()
         binding.btnAdd.setOnClickListener {
-            val intent = Intent(this, CreateNoteActivity::class.java)
-            intent.putExtra(CreateNoteActivity.EXTRA_KEY,"create")
+            val intent = Intent(this, DetailNoteActivity::class.java)
+            intent.putExtra(DetailNoteActivity.EXTRA_KEY,"create")
             resultLauncher.launch(intent)
         }
         getAndShowData()
@@ -53,9 +52,9 @@ class NoteActivity : AppCompatActivity() {
 
     private fun onItemClick() {
         noteAdapter.onItemClick = {note ->
-            val intent = Intent(this, CreateNoteActivity::class.java)
-            intent.putExtra(CreateNoteActivity.EXTRA_KEY,"update")
-            intent.putExtra(CreateNoteActivity.EXTRA_DATA,note)
+            val intent = Intent(this, DetailNoteActivity::class.java)
+            intent.putExtra(DetailNoteActivity.EXTRA_KEY,"update")
+            intent.putExtra(DetailNoteActivity.EXTRA_DATA,note)
             resultLauncher.launch(intent)
         }
     }

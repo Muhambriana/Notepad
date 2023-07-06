@@ -10,21 +10,21 @@ import com.mshell.notepad.AppController
 import com.mshell.notepad.R
 import com.mshell.notepad.core.db.DaoSession
 import com.mshell.notepad.core.db.Note
-import com.mshell.notepad.databinding.ActivityCreateNoteBinding
+import com.mshell.notepad.databinding.ActivityDetailNoteBinding
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.Date
 
-class CreateNoteActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityCreateNoteBinding
+class DetailNoteActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityDetailNoteBinding
     private lateinit var daoSession: DaoSession
 
     private var note: Note? = Note()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityCreateNoteBinding.inflate(layoutInflater)
+        binding = ActivityDetailNoteBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         firstInit()
