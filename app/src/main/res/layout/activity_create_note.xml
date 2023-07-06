@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.CreateNoteActivity"
+    android:orientation="vertical"
+    android:padding="20dp"
+    >
+
+    <TextView
+        android:id="@+id/tv_latest_update"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        tools:text="29-09-2022 19:00:89"
+        android:visibility="gone"
+        />
+
+    <EditText
+        android:id="@+id/ed_note_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:fontFamily="@font/nunito_light"
+        android:textStyle="bold"
+        android:hint="Judul"
+        android:importantForAutofill="no"
+        android:inputType="textCapWords"
+        android:padding="10dp"
+        android:singleLine="false"
+        android:textSize="35sp" />
+
+    <EditText
+        android:id="@+id/ed_note_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:ems="10"
+        android:fontFamily="@font/nunito_light"
+        android:gravity="top|start"
+        android:hint="Catatan"
+        android:importantForAutofill="no"
+        android:inputType="textMultiLine"
+        android:padding="10dp"
+        android:textSize="23sp" />
+
+</LinearLayout>
