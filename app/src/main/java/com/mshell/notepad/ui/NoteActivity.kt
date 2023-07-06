@@ -63,7 +63,6 @@ class NoteActivity : AppCompatActivity() {
         val daoSession = (application as AppController).getDaoSession()
         val noteDao = daoSession.noteDao
         val queryRes: List<Note> = noteDao.queryBuilder().orderDesc(Properties.Last_updated).list()
-        println("kocak ${queryRes[0].last_updated}")
 
         return queryRes
     }
