@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import com.mshell.notepad.AppController
 import com.mshell.notepad.R
 import com.mshell.notepad.core.db.DaoSession
@@ -89,13 +90,21 @@ class DetailNoteActivity : AppCompatActivity() {
         data.await()?.date_created = Date()
         data.await()?.last_updated = Date()
         daoSession.noteDao.insert(data.await())
+
+        showToast()
+        setResult(RESULT_OK)
+    }
+
+    private fun showToast() {
+        Toast.makeText(this, "Catatan Berhasil Disimpan", Toast.LENGTH_LONG).show()
     }
 
     private fun updateToDB() = runBlocking {
         val data = async { saveNote() }
         data.await()?.last_updated = Date()
         daoSession.noteDao.update(note)
-        println("kocak ${data.await()?.last_updated}")
+
+        showToast()
         setResult(RESULT_OK)
     }
 
