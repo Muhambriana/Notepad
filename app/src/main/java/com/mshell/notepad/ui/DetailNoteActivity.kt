@@ -7,6 +7,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mshell.notepad.AppController
 import com.mshell.notepad.R
 import com.mshell.notepad.core.db.DaoSession
@@ -22,6 +24,7 @@ class DetailNoteActivity : AppCompatActivity() {
     private lateinit var daoSession: DaoSession
 
     private var note: Note? = Note()
+    private var isNotSaved = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,31 +32,6 @@ class DetailNoteActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         firstInit()
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.detail_note_menu, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.save_menu -> {
-                if(intent.getStringExtra(EXTRA_KEY) == "update") {
-                    note = intent.getParcelableExtra(EXTRA_DATA)
-                    updateToDB()
-                } else {
-                    saveToDB()
-                }
-
-                true
-            }
-            android.R.id.home -> {
-                onBackPressed()
-                true
-            }
-            else -> true
-        }
     }
 
     private fun firstInit() {
@@ -70,8 +48,6 @@ class DetailNoteActivity : AppCompatActivity() {
     private fun updateNote(note: Note?) {
 
         val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
-        println("before: ${note?.date_created}")
-        println("after: ${note?.last_updated?.let { formatter.format(it) }}")
         binding.edNoteTitle.setText(note?.title)
         binding.edNoteDesc.setText(note?.description)
         binding.tvLatestUpdate.text = note?.last_updated?.let { formatter.format(it) }
@@ -106,6 +82,73 @@ class DetailNoteActivity : AppCompatActivity() {
 
         showToast()
         setResult(RESULT_OK)
+    }
+
+    private fun showConfirmDialog() {
+        if (isNotSaved) {
+            MaterialAlertDialogBuilder(this)
+                .setMessage("Are you sure want to quit without save")
+                .setPositiveButton("STAY") {_, _->
+
+                }
+                .setNegativeButton("QUIT") {_, _ ->
+                    finish()
+                }
+                .setCancelable(false)
+                .show()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    private fun onTextChangeListener(menuItem: MenuItem) {
+        binding.edNoteTitle.addTextChangedListener {
+            //hide and show save button
+            isNotSaved = true
+            menuItem.isVisible = isNotSaved
+        }
+
+        binding.edNoteDesc.addTextChangedListener {
+            isNotSaved = true
+            menuItem.isVisible = isNotSaved
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.detail_note_menu, menu)
+        menu?.findItem(R.id.save_menu)?.let { onTextChangeListener(it) }
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.save_menu -> {
+                if(intent.getStringExtra(EXTRA_KEY) == "update") {
+                    note = intent.getParcelableExtra(EXTRA_DATA)
+                    updateToDB()
+                    isNotSaved = false
+                    item.isVisible = isNotSaved
+                } else {
+                    saveToDB()
+                    isNotSaved = false
+                    item.isVisible = isNotSaved
+                }
+
+                true
+            }
+            android.R.id.home -> {
+                showConfirmDialog()
+                onBackPressed()
+                true
+            }
+            else -> true
+        }
+    }
+
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        showConfirmDialog()
     }
 
     companion object{
