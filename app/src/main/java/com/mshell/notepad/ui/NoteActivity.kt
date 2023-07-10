@@ -4,10 +4,15 @@ import android.content.Intent
 import kotlinx.coroutines.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mshell.notepad.AppController
+import com.mshell.notepad.R
 import com.mshell.notepad.core.adapter.NoteAdapter
 import com.mshell.notepad.core.db.Note
 import com.mshell.notepad.core.db.NoteDao.Properties
@@ -18,6 +23,7 @@ class NoteActivity : AppCompatActivity() {
     private lateinit var resultLauncher: ActivityResultLauncher<Intent>
 
     private val noteAdapter = NoteAdapter()
+    private var isSaved = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,12 +40,27 @@ class NoteActivity : AppCompatActivity() {
             intent.putExtra(DetailNoteActivity.EXTRA_KEY,"create")
             resultLauncher.launch(intent)
         }
-        getAndShowData()
+        getAndShowData(null)
     }
 
-    private fun getAndShowData() = runBlocking {
-        val dataNote = async { getNoteData() }
+    private fun getAndShowData(keyWord: String?) = runBlocking {
+        val dataNote = async { getNoteData(keyWord) }
+
+        binding.viewEmpty.root.visibility = View.GONE
+        binding.viewNotFound.root.visibility =  View.GONE
+        if (keyWord == null && dataNote.await().isEmpty()) {
+            binding.viewEmpty.root.visibility = View.VISIBLE
+            return@runBlocking
+        } else if(keyWord != null && dataNote.await().isEmpty()) {
+            binding.viewNotFound.root.visibility =  View.VISIBLE
+            return@runBlocking
+        }
         showRecyclerList(dataNote.await())
+    }
+
+    private fun hideRecycleList() {
+        binding.rvNote.layoutManager = null
+        binding.rvNote.adapter = null
     }
 
     private fun showRecyclerList(dataNote: List<Note>) {
@@ -59,12 +80,22 @@ class NoteActivity : AppCompatActivity() {
         }
     }
 
-    private fun getNoteData(): List<Note> {
+    private fun searchBookByKeywords(title: String?) {
+
+    }
+
+    private fun getNoteData(keyWord: String?): List<Note> {
         val daoSession = (application as AppController).getDaoSession()
         val noteDao = daoSession.noteDao
-        val queryRes: List<Note> = noteDao.queryBuilder().orderDesc(Properties.Last_updated).list()
-
-        return queryRes
+         if (keyWord == null) {
+             println("bukan search")
+            return noteDao.queryBuilder().orderDesc(Properties.Last_updated).list()
+        } else {
+             println("masuk search ${noteDao.queryBuilder()
+                 .whereOr(Properties.Title.eq(keyWord), Properties.Description.eq(keyWord)).list().size}")
+             return noteDao.queryBuilder()
+                 .whereOr(Properties.Title.like("%$keyWord%"), Properties.Description.like("%$keyWord%")).list()
+         }
     }
 
     private fun setLauncher() {
@@ -74,9 +105,58 @@ class NoteActivity : AppCompatActivity() {
         ){ result ->
             if (result.resultCode == RESULT_OK) {
                 //Re-run getBookData and update with the latest
-                getAndShowData()
+                getAndShowData(null)
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.list_note_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.search_menu -> {
+                searchViewListener(item)
+                true
+            }
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            else -> true
+        }
+    }
+
+    private fun searchViewListener(item: MenuItem) {
+        // getting search view of our item.
+        val searchView: SearchView = item.actionView as SearchView
+
+        // below line is to call set on query text listener method.
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(title: String?): Boolean {
+                hideRecycleList()
+                getAndShowData(title)
+                return false
+            }
+
+            override fun onQueryTextChange(msg: String): Boolean {
+                return false
+            }
+        })
+
+        item.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(p0: MenuItem): Boolean {
+                hideRecycleList()
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(p0: MenuItem): Boolean {
+                getAndShowData(null)
+                return true
+            }
+        })
     }
 
 }
