@@ -13,6 +13,7 @@ import com.mshell.notepad.AppController
 import com.mshell.notepad.R
 import com.mshell.notepad.core.db.DaoSession
 import com.mshell.notepad.core.db.Note
+import com.mshell.notepad.core.db.NoteDao.Properties
 import com.mshell.notepad.databinding.ActivityDetailNoteBinding
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -39,19 +40,26 @@ class DetailNoteActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         daoSession = (application as AppController).getDaoSession()
 
+        note = intent.getParcelableExtra(EXTRA_DATA)
+        getLatestSavedDate()
         if (intent.getStringExtra(EXTRA_KEY) == "update") {
-            updateNote(intent.getParcelableExtra<Note>(EXTRA_DATA))
+            fillEditText()
         }
     }
 
     @SuppressLint("SimpleDateFormat")
-    private fun updateNote(note: Note?) {
+    private fun fillEditText() {
 
-        val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
         binding.edNoteTitle.setText(note?.title)
         binding.edNoteDesc.setText(note?.description)
-        binding.tvLatestUpdate.text = note?.last_updated?.let { formatter.format(it) }
+        binding.tvLatestUpdate.text = note?.last_updated?.let { dateFormat(it) }
         binding.tvLatestUpdate.visibility = View.VISIBLE
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun dateFormat(date: Date):String {
+        val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
+        return formatter.format(date)
     }
 
     private fun saveNote():Note? {
@@ -85,7 +93,8 @@ class DetailNoteActivity : AppCompatActivity() {
     }
 
     private fun showConfirmDialog() {
-        if (isNotSaved) {
+        if (note?.title != binding.edNoteTitle.text.toString() || note?.description != binding.edNoteDesc.text.toString()) {
+            println("masuk kondisi ${note?.title}  || ${binding.edNoteTitle.text.toString()}")
             MaterialAlertDialogBuilder(this)
                 .setMessage("Are you sure want to quit without save")
                 .setPositiveButton("STAY") {_, _->
@@ -114,6 +123,11 @@ class DetailNoteActivity : AppCompatActivity() {
         }
     }
 
+    private fun getLatestSavedDate(): String {
+        val item = daoSession.noteDao.queryBuilder().where(Properties.Id.eq(note?.id)).unique().last_updated
+        return dateFormat(item)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.detail_note_menu, menu)
         menu?.findItem(R.id.save_menu)?.let { onTextChangeListener(it) }
@@ -124,14 +138,15 @@ class DetailNoteActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.save_menu -> {
                 if(intent.getStringExtra(EXTRA_KEY) == "update") {
-                    note = intent.getParcelableExtra(EXTRA_DATA)
                     updateToDB()
                     isNotSaved = false
                     item.isVisible = isNotSaved
+                    binding.tvLatestUpdate.text = getLatestSavedDate()
                 } else {
                     saveToDB()
                     isNotSaved = false
                     item.isVisible = isNotSaved
+                    binding.tvLatestUpdate.text = getLatestSavedDate()
                 }
 
                 true

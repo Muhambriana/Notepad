@@ -23,7 +23,6 @@ class NoteActivity : AppCompatActivity() {
     private lateinit var resultLauncher: ActivityResultLauncher<Intent>
 
     private val noteAdapter = NoteAdapter()
-    private var isSaved = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,22 +79,18 @@ class NoteActivity : AppCompatActivity() {
         }
     }
 
-    private fun searchBookByKeywords(title: String?) {
-
-    }
-
     private fun getNoteData(keyWord: String?): List<Note> {
         val daoSession = (application as AppController).getDaoSession()
         val noteDao = daoSession.noteDao
-         if (keyWord == null) {
-             println("bukan search")
-            return noteDao.queryBuilder().orderDesc(Properties.Last_updated).list()
+        return if (keyWord == null) {
+            println("bukan search")
+            noteDao.queryBuilder().orderDesc(Properties.Last_updated).list()
         } else {
-             println("masuk search ${noteDao.queryBuilder()
-                 .whereOr(Properties.Title.eq(keyWord), Properties.Description.eq(keyWord)).list().size}")
-             return noteDao.queryBuilder()
-                 .whereOr(Properties.Title.like("%$keyWord%"), Properties.Description.like("%$keyWord%")).list()
-         }
+            println("masuk search ${noteDao.queryBuilder()
+                .whereOr(Properties.Title.eq(keyWord), Properties.Description.eq(keyWord)).list().size}")
+            noteDao.queryBuilder()
+                .whereOr(Properties.Title.like("%$keyWord%"), Properties.Description.like("%$keyWord%")).list()
+        }
     }
 
     private fun setLauncher() {
