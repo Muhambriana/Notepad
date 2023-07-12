@@ -40,8 +40,11 @@ class DetailNoteActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         daoSession = (application as AppController).getDaoSession()
 
-        note = intent.getParcelableExtra(EXTRA_DATA)
-        getLatestSavedDate()
+        val dataNote: Note? = intent.getParcelableExtra(EXTRA_DATA)
+        if (dataNote != null) {
+            note = dataNote
+        }
+
         if (intent.getStringExtra(EXTRA_KEY) == "update") {
             fillEditText()
         }

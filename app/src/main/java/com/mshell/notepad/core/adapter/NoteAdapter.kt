@@ -16,6 +16,9 @@ class NoteAdapter: RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
     private val randomColor = listOf(R.color.random_color_1, R.color.random_color_2, R.color.random_color_3, R.color.random_color_4, R.color.random_color_5, R.color.random_color_6)
     var onItemClick: ((Note) -> Unit)? = null
 
+    private var try1 = 1
+    var try2 = 1
+
     fun setNoteList(notes: List<Note>?) {
         if (notes == null) return
         listNote.clear()
@@ -40,8 +43,13 @@ class NoteAdapter: RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 
     inner class NoteViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         private val binding = ItemListNoteBinding.bind(itemView)
+        var try3 = 0
         fun bind(note: Note){
             with(binding){
+                try2++
+                println("calling try3 in $try2 times ")
+                try3++
+                println("calling try3 in $try3 times ")
 //                binding.root.setCardBackgroundColor(ContextCompat.getColor(itemView.context, R.color.random_color_1))
                 binding.root.setCardBackgroundColor(ContextCompat.getColor(itemView.context, randomColor.random()))
                 binding.noteTitle.text = note.title
