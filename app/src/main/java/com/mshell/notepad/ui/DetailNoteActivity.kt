@@ -44,7 +44,6 @@ class DetailNoteActivity : AppCompatActivity() {
         if (dataNote != null) {
             note = dataNote
         }
-
         if (intent.getStringExtra(EXTRA_KEY) == "update") {
             fillEditText()
         }
